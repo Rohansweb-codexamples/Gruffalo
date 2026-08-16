@@ -1,0 +1,1406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Sound Key Dashboard</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Arial,sans-serif;
+-webkit-tap-highlight-color:transparent;
+user-select:none;
+}
+
+html,body{
+width:100%;
+height:100%;
+overflow:hidden;
+}
+
+body{
+color:white;
+background:
+radial-gradient(circle at 15% 10%,#ffd740 0%,transparent 25%),
+radial-gradient(circle at 90% 15%,#ff4081 0%,transparent 30%),
+radial-gradient(circle at 50% 100%,#651fff 0%,transparent 55%),
+linear-gradient(135deg,#ff6d00,#ff1744,#7c4dff);
+background-size:160% 160%;
+animation:bg 12s ease-in-out infinite alternate;
+}
+
+@keyframes bg{
+from{background-position:0 0}
+to{background-position:100% 100%}
+}
+
+.app{
+width:100%;
+height:100%;
+padding:20px;
+display:flex;
+flex-direction:column;
+gap:15px;
+}
+
+header{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:15px;
+}
+
+h1{
+font-size:clamp(24px,4vw,44px);
+font-weight:900;
+letter-spacing:3px;
+}
+
+.subtitle{
+opacity:.6;
+margin-top:5px;
+}
+
+.topButtons{
+display:flex;
+gap:10px;
+flex-wrap:wrap;
+}
+
+.btn{
+border:0;
+padding:13px 18px;
+border-radius:15px;
+background:#ffffff18;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+.btn:hover{
+background:#ffffff28;
+}
+
+.stop{
+background:#ff1744;
+}
+
+.keys{
+flex:1;
+display:grid;
+grid-template-columns:repeat(4,1fr);
+gap:15px;
+min-height:0;
+}
+
+.key{
+position:relative;
+min-height:190px;
+border-radius:25px;
+padding:18px;
+background:
+linear-gradient(145deg,#ffffff22,#ffffff08);
+border:1px solid #ffffff25;
+backdrop-filter:blur(20px);
+box-shadow:0 15px 45px #0004;
+display:flex;
+flex-direction:column;
+justify-content:space-between;
+overflow:hidden;
+transition:.15s;
+cursor:pointer;
+}
+
+.key:hover{
+transform:translateY(-3px);
+}
+
+.key:active,
+.key.playing{
+transform:scale(.97);
+box-shadow:
+0 0 35px #ffffff66,
+0 15px 45px #0005;
+}
+
+.key.playing::after{
+content:"";
+position:absolute;
+inset:0;
+border-radius:25px;
+border:3px solid #ffffff66;
+animation:pulse .7s infinite alternate;
+pointer-events:none;
+}
+
+@keyframes pulse{
+from{opacity:.3}
+to{opacity:1}
+}
+
+.keyNumber{
+font-size:13px;
+font-weight:bold;
+opacity:.55;
+}
+
+.keyIcon{
+font-size:55px;
+font-weight:900;
+line-height:1;
+}
+
+.keyName{
+font-size:20px;
+font-weight:900;
+word-break:break-word;
+}
+
+.keyFile{
+font-size:11px;
+opacity:.5;
+overflow:hidden;
+white-space:nowrap;
+text-overflow:ellipsis;
+}
+
+.keyFooter{
+display:flex;
+justify-content:space-between;
+align-items:center;
+gap:6px;
+}
+
+.smallButton{
+border:0;
+background:#ffffff18;
+color:white;
+padding:8px 10px;
+border-radius:10px;
+font-size:11px;
+font-weight:bold;
+cursor:pointer;
+}
+
+.smallButton:hover{
+background:#ffffff2d;
+}
+
+.repeatButton.on{
+background:#00c853;
+}
+
+.clearButton{
+background:#ff174444;
+}
+
+.panel{
+position:fixed;
+inset:0;
+background:#050509dd;
+backdrop-filter:blur(20px);
+display:none;
+align-items:center;
+justify-content:center;
+z-index:100;
+padding:20px;
+}
+
+.panelBox{
+width:min(95%,600px);
+max-height:90vh;
+overflow:auto;
+background:#111827f5;
+border-radius:30px;
+padding:25px;
+box-shadow:0 30px 100px #0009;
+}
+
+.panelBox h2{
+font-size:30px;
+margin-bottom:7px;
+}
+
+.panelSub{
+opacity:.6;
+margin-bottom:20px;
+}
+
+.upload{
+border:2px dashed #ffffff30;
+padding:30px;
+border-radius:20px;
+text-align:center;
+margin-bottom:20px;
+}
+
+.upload input{
+display:none;
+}
+
+.upload label{
+display:inline-block;
+padding:15px 22px;
+border-radius:15px;
+background:linear-gradient(135deg,#ff9800,#ff4081);
+font-weight:bold;
+cursor:pointer;
+}
+
+.library{
+display:flex;
+flex-direction:column;
+gap:8px;
+margin-bottom:20px;
+}
+
+.libraryItem{
+display:flex;
+align-items:center;
+justify-content:space-between;
+gap:10px;
+padding:13px;
+border-radius:15px;
+background:#ffffff0d;
+}
+
+.libraryName{
+overflow:hidden;
+text-overflow:ellipsis;
+white-space:nowrap;
+}
+
+.libraryActions{
+display:flex;
+gap:6px;
+}
+
+.libraryActions button{
+border:0;
+padding:8px 10px;
+border-radius:9px;
+background:#ffffff15;
+color:white;
+cursor:pointer;
+}
+
+.close{
+width:100%;
+margin-top:10px;
+padding:15px;
+border:0;
+border-radius:15px;
+background:#ffffff15;
+color:white;
+font-weight:bold;
+cursor:pointer;
+}
+
+.status{
+font-size:12px;
+text-align:center;
+opacity:.5;
+}
+
+.repeatInfo{
+position:absolute;
+top:15px;
+right:15px;
+font-size:10px;
+padding:6px 8px;
+border-radius:9px;
+background:#00c853;
+font-weight:bold;
+display:none;
+}
+
+.key.repeat .repeatInfo{
+display:block;
+}
+
+@media(max-width:900px){
+.keys{
+grid-template-columns:repeat(2,1fr);
+overflow:auto;
+padding-bottom:20px;
+}
+}
+
+@media(max-width:500px){
+.app{
+padding:12px;
+}
+
+header{
+display:block;
+}
+
+.topButtons{
+margin-top:12px;
+}
+
+.keys{
+gap:10px;
+}
+
+.key{
+min-height:175px;
+padding:14px;
+}
+
+.keyIcon{
+font-size:42px;
+}
+
+.keyFooter{
+flex-wrap:wrap;
+}
+
+.smallButton{
+flex:1;
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="app">
+
+<header>
+
+<div>
+<h1>SOUND KEYS</h1>
+
+<div class="subtitle">
+Tap a key to play its assigned track
+</div>
+</div>
+
+<div class="topButtons">
+
+<button class="btn" onclick="openLibrary()">
+TRACK LIBRARY
+</button>
+
+<button class="btn" onclick="toggleAllRepeat()">
+REPEAT ALL
+</button>
+
+<button class="btn stop" onclick="stopAll()">
+STOP ALL
+</button>
+
+</div>
+
+</header>
+
+
+<div class="keys" id="keys"></div>
+
+
+<div class="status" id="status">
+READY
+</div>
+
+</div>
+
+
+<!-- TRACK LIBRARY -->
+
+<div class="panel" id="libraryPanel">
+
+<div class="panelBox">
+
+<h2>Track Library</h2>
+
+<div class="panelSub">
+Upload audio and assign it to any key.
+</div>
+
+<div class="upload">
+
+<input
+id="fileInput"
+type="file"
+accept="audio/*"
+multiple
+onchange="uploadFiles(event)">
+
+<label for="fileInput">
+UPLOAD AUDIO
+</label>
+
+<p style="opacity:.45;margin-top:12px;font-size:12px">
+MP3, WAV, OGG and other browser-supported audio
+</p>
+
+</div>
+
+<div class="library" id="library"></div>
+
+<button
+class="close"
+onclick="closeLibrary()">
+CLOSE
+</button>
+
+</div>
+
+</div>
+
+
+<!-- ASSIGN PANEL -->
+
+<div class="panel" id="assignPanel">
+
+<div class="panelBox">
+
+<h2>Assign Track</h2>
+
+<div class="panelSub" id="assignTitle">
+Choose a track
+</div>
+
+<div
+class="library"
+id="assignList">
+</div>
+
+<button
+class="close"
+onclick="closeAssign()">
+CANCEL
+</button>
+
+</div>
+
+</div>
+
+
+<script>
+
+/* ==========================================
+   SETTINGS
+========================================== */
+
+const KEY_COUNT=12;
+
+let tracks=[];
+
+let assignments={};
+
+let repeatSettings={};
+
+let audioPlayers={};
+
+let assigningKey=null;
+
+
+/* ==========================================
+   BUILT-IN TRACKS
+========================================== */
+
+const builtInTracks=[
+
+{
+id:"choosing",
+name:"Choosing",
+url:"https://rohansweb-codexamples.github.io/Gruffalo/choosing.mp3"
+},
+
+{
+id:"mouse",
+name:"Mouse",
+url:"https://rohansweb-codexamples.github.io/Gruffalo/mouse.mp3"
+},
+
+{
+id:"end",
+name:"End",
+url:"https://rohansweb-codexamples.github.io/Gruffalo/end.mp3"
+}
+
+];
+
+
+tracks=[
+...builtInTracks
+];
+
+
+/* ==========================================
+   LOAD SAVED SETTINGS
+========================================== */
+
+try{
+
+assignments=
+JSON.parse(
+localStorage.getItem(
+"soundKeyAssignments"
+)
+)||{};
+
+}catch(e){
+
+assignments={};
+
+}
+
+
+try{
+
+repeatSettings=
+JSON.parse(
+localStorage.getItem(
+"soundKeyRepeats"
+)
+)||{};
+
+}catch(e){
+
+repeatSettings={};
+
+}
+
+
+/* ==========================================
+   CREATE KEYS
+========================================== */
+
+function createKeys(){
+
+const container=
+document.getElementById("keys");
+
+container.innerHTML="";
+
+for(let i=1;i<=KEY_COUNT;i++){
+
+const key=
+document.createElement("div");
+
+key.className="key";
+
+if(repeatSettings[i]){
+key.classList.add("repeat");
+}
+
+key.id="key"+i;
+
+key.onclick=()=>{
+
+if(assigningKey)return;
+
+playKey(i);
+
+};
+
+key.innerHTML=`
+
+<div>
+
+<div class="keyNumber">
+KEY ${String(i).padStart(2,"0")}
+</div>
+
+<div class="keyIcon">
+${i}
+</div>
+
+<div class="keyName" id="name${i}">
+EMPTY
+</div>
+
+<div class="keyFile" id="file${i}">
+No track assigned
+</div>
+
+</div>
+
+<div class="repeatInfo">
+REPEAT
+</div>
+
+<div class="keyFooter">
+
+<button
+class="smallButton"
+onclick="event.stopPropagation();openAssign(${i})">
+ASSIGN
+</button>
+
+<button
+class="smallButton repeatButton ${
+repeatSettings[i]?"on":""
+}"
+id="repeat${i}"
+onclick="event.stopPropagation();toggleRepeat(${i})">
+REPEAT
+</button>
+
+<button
+class="smallButton clearButton"
+onclick="event.stopPropagation();clearKey(${i})">
+CLEAR
+</button>
+
+</div>
+
+`;
+
+container.appendChild(key);
+
+}
+
+updateKeys();
+
+}
+
+
+/* ==========================================
+   UPDATE KEY DISPLAY
+========================================== */
+
+function updateKeys(){
+
+for(let i=1;i<=KEY_COUNT;i++){
+
+const trackId=
+assignments[i];
+
+const track=
+tracks.find(
+t=>t.id===trackId
+);
+
+const name=
+document.getElementById(
+"name"+i
+);
+
+const file=
+document.getElementById(
+"file"+i
+);
+
+if(track){
+
+name.textContent=
+track.name;
+
+file.textContent=
+track.fileName||
+"Built-in track";
+
+}else{
+
+name.textContent=
+"EMPTY";
+
+file.textContent=
+"No track assigned";
+
+}
+
+const key=
+document.getElementById(
+"key"+i
+);
+
+const repeatButton=
+document.getElementById(
+"repeat"+i
+);
+
+if(repeatSettings[i]){
+
+key.classList.add("repeat");
+repeatButton.classList.add("on");
+
+}else{
+
+key.classList.remove("repeat");
+repeatButton.classList.remove("on");
+
+}
+
+}
+
+}
+
+
+/* ==========================================
+   PLAY KEY
+========================================== */
+
+function playKey(number){
+
+const trackId=
+assignments[number];
+
+if(!trackId){
+
+document.getElementById("status")
+.textContent=
+"KEY "+number+
+" HAS NO TRACK";
+
+return;
+
+}
+
+const track=
+tracks.find(
+t=>t.id===trackId
+);
+
+if(!track)return;
+
+
+/* Stop all other sounds */
+
+Object.values(audioPlayers)
+.forEach(audio=>{
+audio.pause();
+});
+
+
+document
+.querySelectorAll(".key")
+.forEach(key=>{
+key.classList.remove("playing");
+});
+
+
+const audio=
+getAudio(track);
+
+audio.currentTime=0;
+
+audio.loop=
+!!repeatSettings[number];
+
+audio.play().catch(()=>{});
+
+
+document
+.getElementById("key"+number)
+.classList.add("playing");
+
+
+document.getElementById("status")
+.textContent=
+"PLAYING KEY "+
+number+
+" • "+
+track.name+
+(
+repeatSettings[number]
+?" • REPEAT"
+:""
+);
+
+
+audio.onended=()=>{
+
+if(!repeatSettings[number]){
+
+document
+.getElementById("key"+number)
+.classList.remove("playing");
+
+document.getElementById("status")
+.textContent="READY";
+
+}
+
+};
+
+}
+
+
+/* ==========================================
+   GET AUDIO
+========================================== */
+
+function getAudio(track){
+
+if(audioPlayers[track.id]){
+
+return audioPlayers[track.id];
+
+}
+
+const audio=
+new Audio(track.url);
+
+audio.preload="auto";
+
+audioPlayers[track.id]=audio;
+
+return audio;
+
+}
+
+
+/* ==========================================
+   TOGGLE REPEAT
+========================================== */
+
+function toggleRepeat(number){
+
+repeatSettings[number]=
+!repeatSettings[number];
+
+saveRepeatSettings();
+
+updateKeys();
+
+const trackId=
+assignments[number];
+
+const track=
+tracks.find(
+t=>t.id===trackId
+);
+
+if(
+track &&
+audioPlayers[track.id]
+){
+
+audioPlayers[track.id].loop=
+repeatSettings[number];
+
+}
+
+document.getElementById("status")
+.textContent=
+"KEY "+
+number+
+" REPEAT "+
+(
+repeatSettings[number]
+?"ON"
+:"OFF"
+);
+
+}
+
+
+/* ==========================================
+   REPEAT ALL
+========================================== */
+
+function toggleAllRepeat(){
+
+let turnOn=false;
+
+for(let i=1;i<=KEY_COUNT;i++){
+
+if(!repeatSettings[i]){
+
+turnOn=true;
+break;
+
+}
+
+}
+
+for(let i=1;i<=KEY_COUNT;i++){
+
+repeatSettings[i]=turnOn;
+
+}
+
+saveRepeatSettings();
+
+updateKeys();
+
+document.getElementById("status")
+.textContent=
+turnOn
+?"REPEAT ON FOR ALL KEYS"
+:"REPEAT OFF FOR ALL KEYS";
+
+}
+
+
+/* ==========================================
+   TRACK LIBRARY
+========================================== */
+
+function openLibrary(){
+
+renderLibrary();
+
+document
+.getElementById("libraryPanel")
+.style.display="flex";
+
+}
+
+
+function closeLibrary(){
+
+document
+.getElementById("libraryPanel")
+.style.display="none";
+
+}
+
+
+/* ==========================================
+   UPLOAD FILES
+========================================== */
+
+function uploadFiles(event){
+
+const files=
+Array.from(event.target.files);
+
+files.forEach(file=>{
+
+const id=
+"upload_"+
+Date.now()+
+"_"+Math.random()
+.toString(36)
+.substring(2);
+
+const url=
+URL.createObjectURL(file);
+
+tracks.push({
+
+id:id,
+
+name:file.name
+.replace(/\.[^/.]+$/,""),
+
+fileName:file.name,
+
+url:url,
+
+uploaded:true
+
+});
+
+});
+
+event.target.value="";
+
+renderLibrary();
+
+updateKeys();
+
+document.getElementById("status")
+.textContent=
+files.length+
+" TRACK"+
+(files.length===1?"":"S")+
+" UPLOADED";
+
+}
+
+
+/* ==========================================
+   RENDER LIBRARY
+========================================== */
+
+function renderLibrary(){
+
+const library=
+document.getElementById("library");
+
+library.innerHTML="";
+
+tracks.forEach(track=>{
+
+const item=
+document.createElement("div");
+
+item.className="libraryItem";
+
+item.innerHTML=`
+
+<div class="libraryName">
+${escapeHTML(track.name)}
+</div>
+
+<div class="libraryActions">
+
+<button>
+PLAY
+</button>
+
+<button>
+ASSIGN
+</button>
+
+</div>
+
+`;
+
+const buttons=
+item.querySelectorAll("button");
+
+
+buttons[0].onclick=()=>{
+
+playTrack(track);
+
+};
+
+
+buttons[1].onclick=()=>{
+
+closeLibrary();
+
+openAssignForTrack(track);
+
+};
+
+
+library.appendChild(item);
+
+});
+
+}
+
+
+/* ==========================================
+   PLAY TRACK FROM LIBRARY
+========================================== */
+
+function playTrack(track){
+
+stopAll();
+
+const audio=
+getAudio(track);
+
+audio.loop=false;
+
+audio.currentTime=0;
+
+audio.play().catch(()=>{});
+
+document.getElementById("status")
+.textContent=
+"PLAYING • "+
+track.name;
+
+audio.onended=()=>{
+
+document.getElementById("status")
+.textContent=
+"READY";
+
+};
+
+}
+
+
+/* ==========================================
+   ASSIGN
+========================================== */
+
+function openAssign(number){
+
+assigningKey=number;
+
+document.getElementById("assignTitle")
+.textContent=
+"Assign a track to KEY "+
+number;
+
+renderAssignList();
+
+document
+.getElementById("assignPanel")
+.style.display="flex";
+
+}
+
+
+function openAssignForTrack(track){
+
+let key=null;
+
+for(let i=1;i<=KEY_COUNT;i++){
+
+if(!assignments[i]){
+
+key=i;
+break;
+
+}
+
+}
+
+if(key){
+
+assignments[key]=
+track.id;
+
+saveAssignments();
+
+updateKeys();
+
+document.getElementById("status")
+.textContent=
+track.name+
+" assigned to KEY "+
+key;
+
+}else{
+
+alert(
+"All keys are already assigned."
+);
+
+}
+
+}
+
+
+function renderAssignList(){
+
+const list=
+document.getElementById(
+"assignList"
+);
+
+list.innerHTML="";
+
+tracks.forEach(track=>{
+
+const item=
+document.createElement("div");
+
+item.className=
+"libraryItem";
+
+item.innerHTML=`
+
+<div class="libraryName">
+${escapeHTML(track.name)}
+</div>
+
+<button class="btn">
+USE TRACK
+</button>
+
+`;
+
+item
+.querySelector("button")
+.onclick=()=>{
+
+assignments[assigningKey]=
+track.id;
+
+saveAssignments();
+
+updateKeys();
+
+closeAssign();
+
+document.getElementById("status")
+.textContent=
+track.name+
+" → KEY "+
+assigningKey;
+
+};
+
+list.appendChild(item);
+
+});
+
+}
+
+
+function closeAssign(){
+
+assigningKey=null;
+
+document
+.getElementById("assignPanel")
+.style.display="none";
+
+}
+
+
+/* ==========================================
+   CLEAR
+========================================== */
+
+function clearKey(number){
+
+const trackId=
+assignments[number];
+
+if(trackId &&
+audioPlayers[trackId]){
+
+audioPlayers[trackId].pause();
+audioPlayers[trackId].currentTime=0;
+
+}
+
+delete assignments[number];
+
+repeatSettings[number]=false;
+
+saveAssignments();
+
+saveRepeatSettings();
+
+updateKeys();
+
+document.getElementById("status")
+.textContent=
+"KEY "+
+number+
+" CLEARED";
+
+}
+
+
+/* ==========================================
+   STOP ALL
+========================================== */
+
+function stopAll(){
+
+Object.values(audioPlayers)
+.forEach(audio=>{
+
+audio.pause();
+
+audio.currentTime=0;
+
+});
+
+
+document
+.querySelectorAll(".key")
+.forEach(key=>{
+key.classList.remove("playing");
+});
+
+
+document.getElementById("status")
+.textContent=
+"STOPPED • ALL AUDIO";
+
+}
+
+
+/* ==========================================
+   SAVE
+========================================== */
+
+function saveAssignments(){
+
+localStorage.setItem(
+"soundKeyAssignments",
+JSON.stringify(assignments)
+);
+
+}
+
+
+function saveRepeatSettings(){
+
+localStorage.setItem(
+"soundKeyRepeats",
+JSON.stringify(
+repeatSettings
+)
+);
+
+}
+
+
+/* ==========================================
+   HTML ESCAPE
+========================================== */
+
+function escapeHTML(text){
+
+return String(text)
+.replace(/&/g,"&amp;")
+.replace(/</g,"&lt;")
+.replace(/>/g,"&gt;")
+.replace(/"/g,"&quot;")
+.replace(/'/g,"&#039;");
+
+}
+
+
+/* ==========================================
+   KEYBOARD
+========================================== */
+
+document.addEventListener(
+"keydown",
+event=>{
+
+if(
+document.querySelector(
+".panel[style*='flex']"
+)
+)return;
+
+const number=
+parseInt(event.key);
+
+if(
+number>=1 &&
+number<=9
+){
+
+playKey(number);
+
+}
+
+if(event.key==="0"){
+
+playKey(10);
+
+}
+
+if(event.key==="-" ){
+
+playKey(11);
+
+}
+
+if(event.key==="="){
+
+playKey(12);
+
+}
+
+}
+);
+
+
+/* ==========================================
+   START
+========================================== */
+
+createKeys();
+
+</script>
+
+</body>
+</html>
