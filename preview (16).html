@@ -1,0 +1,1600 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport"
+      content="width=device-width,initial-scale=1.0,user-scalable=no">
+<title>Adventure Chooser</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  -webkit-tap-highlight-color:transparent;
+  user-select:none;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:
+    radial-gradient(circle at 20% 10%,#ffd740 0%,transparent 25%),
+    radial-gradient(circle at 90% 20%,#ff4081 0%,transparent 30%),
+    radial-gradient(circle at 50% 100%,#651fff 0%,transparent 50%),
+    linear-gradient(135deg,#ff6d00,#ff1744,#7c4dff);
+  background-size:160% 160%;
+  animation:bg 12s ease-in-out infinite alternate;
+  color:white;
+}
+
+@keyframes bg{
+  from{background-position:0 0}
+  to{background-position:100% 100%}
+}
+
+/* MAIN */
+
+#app{
+  width:100%;
+  height:100%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  position:relative;
+}
+
+.screen{
+  position:absolute;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+}
+
+.screen.active{
+  display:flex;
+}
+
+/* CHOOSER */
+
+.title{
+  position:absolute;
+  top:25px;
+  font-size:clamp(20px,4vw,42px);
+  font-weight:900;
+  letter-spacing:5px;
+  text-shadow:0 5px 20px #0005;
+  text-align:center;
+}
+
+.status{
+  position:absolute;
+  top:85px;
+  font-size:14px;
+  opacity:.75;
+  letter-spacing:2px;
+}
+
+.question{
+  width:min(55vw,380px);
+  height:min(55vw,380px);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:clamp(120px,25vw,240px);
+  font-weight:900;
+
+  background:
+    radial-gradient(circle at 32% 22%,#fff 0%,#fff5 7%,transparent 25%),
+    linear-gradient(135deg,#ffeb3b,#ff9800,#ff1744,#7c4dff);
+
+  box-shadow:
+    0 0 30px #fff7,
+    0 25px 80px #0005,
+    inset 0 0 35px #fff5;
+
+  cursor:pointer;
+  transition:.2s;
+}
+
+.question:active{
+  transform:scale(.93);
+}
+
+.question.choosing{
+  animation:pulse .35s infinite alternate;
+}
+
+@keyframes pulse{
+  from{transform:scale(.94)}
+  to{transform:scale(1.06)}
+}
+
+.answer{
+  position:absolute;
+  bottom:13%;
+  min-height:100px;
+  font-size:clamp(55px,12vw,120px);
+  font-weight:1000;
+  letter-spacing:5px;
+  text-shadow:0 5px 25px #0005;
+}
+
+.left{
+  color:#ff5252;
+  text-shadow:0 0 25px #ff1744,0 0 60px #ff174488;
+}
+
+.right{
+  color:#00e676;
+  text-shadow:0 0 25px #00c853,0 0 60px #00c85388;
+}
+
+.middle{
+  color:#40c4ff;
+  text-shadow:0 0 25px #2979ff,0 0 60px #2979ff88;
+}
+
+.help{
+  position:absolute;
+  bottom:20px;
+  font-size:12px;
+  opacity:.5;
+}
+
+/* SENSOR */
+
+.sensorScreen{
+  background:#050509;
+}
+
+.camera{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+  transform:scaleX(-1);
+  opacity:.85;
+}
+
+.cameraShade{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(#0004,#0000 50%,#0007);
+}
+
+.sensorLine{
+  position:absolute;
+  left:8%;
+  right:8%;
+  top:50%;
+  height:7px;
+  background:#00ff88;
+  box-shadow:0 0 20px #00ff88;
+  border-radius:10px;
+}
+
+.sensorLine:before{
+  content:"BRIDGE SENSOR";
+  position:absolute;
+  left:50%;
+  transform:translate(-50%,-160%);
+  background:#00d97b;
+  color:#001c10;
+  padding:7px 15px;
+  border-radius:20px;
+  font-weight:bold;
+  font-size:12px;
+}
+
+.sensorTop{
+  position:absolute;
+  top:20px;
+  left:20px;
+  right:20px;
+  display:flex;
+  justify-content:space-between;
+  z-index:3;
+}
+
+.sensorBadge{
+  padding:10px 15px;
+  border-radius:20px;
+  background:#0008;
+  backdrop-filter:blur(10px);
+  font-weight:bold;
+}
+
+.sensorButton{
+  border:0;
+  padding:10px 18px;
+  border-radius:20px;
+  background:#ffffff22;
+  color:white;
+  font-weight:bold;
+}
+
+/* SETTINGS */
+
+.settings{
+  width:min(94%,700px);
+  max-height:92vh;
+  overflow:auto;
+  padding:25px;
+  border-radius:30px;
+  background:#111827eF;
+  backdrop-filter:blur(25px);
+  box-shadow:0 25px 80px #0008;
+}
+
+.settings h2{
+  font-size:30px;
+  margin-bottom:5px;
+}
+
+.settings p{
+  opacity:.6;
+  margin-bottom:20px;
+}
+
+.setting{
+  background:#ffffff0d;
+  border-radius:20px;
+  padding:17px;
+  margin:10px 0;
+}
+
+.settingTitle{
+  font-size:17px;
+  font-weight:bold;
+  margin-bottom:10px;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+
+input[type=range]{
+  flex:1;
+  min-width:180px;
+}
+
+input[type=text],
+input[type=password]{
+  width:100%;
+  padding:13px;
+  border:0;
+  border-radius:12px;
+  background:#ffffff15;
+  color:white;
+  outline:none;
+}
+
+.btn{
+  border:0;
+  padding:13px 18px;
+  border-radius:14px;
+  background:linear-gradient(135deg,#ff9800,#ff4081);
+  color:white;
+  font-weight:bold;
+  cursor:pointer;
+}
+
+.btn.secondary{
+  background:#ffffff15;
+}
+
+.toggle{
+  width:55px;
+  height:30px;
+  border-radius:30px;
+  background:#555;
+  position:relative;
+  cursor:pointer;
+}
+
+.toggle span{
+  position:absolute;
+  width:24px;
+  height:24px;
+  top:3px;
+  left:3px;
+  border-radius:50%;
+  background:white;
+  transition:.2s;
+}
+
+.toggle.on{
+  background:#00c853;
+}
+
+.toggle.on span{
+  left:28px;
+}
+
+.track{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  background:#ffffff0c;
+  padding:12px;
+  border-radius:12px;
+  margin:6px 0;
+}
+
+.track button{
+  border:0;
+  background:#ffffff18;
+  color:white;
+  border-radius:10px;
+  padding:8px 12px;
+}
+
+/* PIN */
+
+.pinBox{
+  width:min(90%,380px);
+  padding:30px;
+  border-radius:30px;
+  background:#111827ee;
+  text-align:center;
+  box-shadow:0 25px 80px #0008;
+}
+
+.pinBox h2{
+  margin-bottom:15px;
+}
+
+.pinBox input{
+  text-align:center;
+  font-size:25px;
+  letter-spacing:10px;
+  margin-bottom:15px;
+}
+
+/* SECRET */
+
+.secret{
+  position:fixed;
+  top:0;
+  left:0;
+  width:45px;
+  height:45px;
+  opacity:.025;
+  z-index:9999;
+}
+
+#tapCounter{
+  position:fixed;
+  top:7px;
+  left:55px;
+  font-size:10px;
+  opacity:.1;
+  z-index:9999;
+}
+</style>
+</head>
+
+<body>
+
+<div id="app">
+
+  <!-- MAIN -->
+  <section id="mainScreen" class="screen active">
+
+    <div class="title">
+      LEFT • RIGHT • MIDDLE
+    </div>
+
+    <div class="status" id="mainStatus">
+      READY
+    </div>
+
+    <div
+      class="question"
+      id="question"
+      onclick="manualStart()">
+      ?
+    </div>
+
+    <div class="answer" id="answer"></div>
+
+    <div class="help">
+      TAP ? TO CHOOSE
+    </div>
+
+  </section>
+
+
+  <!-- CAMERA -->
+  <section id="sensorScreen" class="screen sensorScreen">
+
+    <video
+      id="camera"
+      class="camera"
+      autoplay
+      muted
+      playsinline>
+    </video>
+
+    <div class="cameraShade"></div>
+
+    <div class="sensorLine" id="sensorLine"></div>
+
+    <div class="sensorTop">
+      <div class="sensorBadge" id="sensorStatus">
+        SENSOR READY
+      </div>
+
+      <button class="sensorButton" onclick="stopSensor()">
+        STOP SENSOR
+      </button>
+    </div>
+
+  </section>
+
+
+  <!-- PIN -->
+  <section id="pinScreen" class="screen">
+
+    <div class="pinBox">
+
+      <h2>ADMIN</h2>
+
+      <p style="opacity:.6;margin-bottom:20px">
+        Enter the admin PIN
+      </p>
+
+      <input
+        id="pinInput"
+        type="password"
+        inputmode="numeric"
+        maxlength="3"
+        placeholder="•••">
+
+      <button class="btn" onclick="checkPin()">
+        ENTER
+      </button>
+
+      <button
+        class="btn secondary"
+        style="margin-top:10px"
+        onclick="showScreen('mainScreen')">
+        CANCEL
+      </button>
+
+    </div>
+
+  </section>
+
+
+  <!-- SETTINGS -->
+  <section id="settingsScreen" class="screen">
+
+    <div class="settings">
+
+      <h2>Admin Settings</h2>
+      <p>Control the adventure chooser</p>
+
+
+      <div class="setting">
+
+        <div class="settingTitle">
+          Camera Sensor
+        </div>
+
+        <div class="row">
+
+          <div
+            class="toggle"
+            id="sensorToggle"
+            onclick="toggleSensorSetting()">
+
+            <span></span>
+
+          </div>
+
+          <span id="sensorToggleText">
+            OFF
+          </span>
+
+        </div>
+
+      </div>
+
+
+      <div class="setting">
+
+        <div class="settingTitle">
+          Bridge Trigger Position
+        </div>
+
+        <div class="row">
+
+          <input
+            id="triggerRange"
+            type="range"
+            min="10"
+            max="90"
+            value="50"
+            oninput="updateTrigger()">
+
+          <b id="triggerValue">50%</b>
+
+        </div>
+
+        <button
+          class="btn"
+          style="margin-top:10px"
+          onclick="openCalibration()">
+          CALIBRATE CAMERA
+        </button>
+
+      </div>
+
+
+      <div class="setting">
+
+        <div class="settingTitle">
+          Choosing Time
+        </div>
+
+        <div class="row">
+
+          <input
+            id="chooseTime"
+            type="range"
+            min="1000"
+            max="8000"
+            step="250"
+            value="2500"
+            oninput="updateChooseTime()">
+
+          <b id="chooseTimeValue">
+            2.5s
+          </b>
+
+        </div>
+
+      </div>
+
+
+      <div class="setting">
+
+        <div class="settingTitle">
+          Music Tracks
+        </div>
+
+        <div id="tracks"></div>
+
+        <button
+          class="btn"
+          style="margin-top:10px"
+          onclick="playAllTracks()">
+          PLAY ALL TRACKS
+        </button>
+
+        <button
+          class="btn secondary"
+          style="margin-top:10px"
+          onclick="stopAllTracks()">
+          STOP MUSIC
+        </button>
+
+      </div>
+
+
+      <div class="setting">
+
+        <div class="settingTitle">
+          Manual Test
+        </div>
+
+        <button class="btn" onclick="manualStart()">
+          TEST CHOOSER
+        </button>
+
+        <button
+          class="btn secondary"
+          onclick="startSensor()">
+          TEST CAMERA SENSOR
+        </button>
+
+      </div>
+
+
+      <div class="row" style="margin-top:20px">
+
+        <button
+          class="btn"
+          onclick="saveSettings()">
+          SAVE SETTINGS
+        </button>
+
+        <button
+          class="btn secondary"
+          onclick="showScreen('mainScreen')">
+          CLOSE
+        </button>
+
+      </div>
+
+    </div>
+
+  </section>
+
+</div>
+
+
+<div
+  class="secret"
+  onclick="secretTap()">
+</div>
+
+<div id="tapCounter"></div>
+
+
+<!-- AUDIO -->
+
+<audio id="choosingAudio" preload="auto">
+  <source
+    src="https://rohansweb-codexamples.github.io/Gruffalo/choosing.mp3"
+    type="audio/mpeg">
+</audio>
+
+<audio id="mouseAudio" preload="auto">
+  <source
+    src="https://rohansweb-codexamples.github.io/Gruffalo/mouse.mp3"
+    type="audio/mpeg">
+</audio>
+
+<audio id="endAudio" preload="auto">
+  <source
+    src="https://rohansweb-codexamples.github.io/Gruffalo/end.mp3"
+    type="audio/mpeg">
+</audio>
+
+
+<script>
+
+/* =========================================
+   SETTINGS
+========================================= */
+
+const defaults={
+  sensor:false,
+  trigger:50,
+  chooseTime:2500
+};
+
+let settings=
+  JSON.parse(localStorage.getItem("chooserSettings"))
+  || defaults;
+
+let choosing=false;
+let sensorStream=null;
+let sensorTimer=null;
+let secretTaps=0;
+let secretTimer=null;
+
+const camera=document.getElementById("camera");
+const sensorLine=document.getElementById("sensorLine");
+const question=document.getElementById("question");
+const answer=document.getElementById("answer");
+const mainStatus=document.getElementById("mainStatus");
+
+const choosingAudio=
+  document.getElementById("choosingAudio");
+
+const mouseAudio=
+  document.getElementById("mouseAudio");
+
+const endAudio=
+  document.getElementById("endAudio");
+
+
+/* =========================================
+   SCREEN CONTROL
+========================================= */
+
+function showScreen(id){
+
+  document
+    .querySelectorAll(".screen")
+    .forEach(s=>s.classList.remove("active"));
+
+  document
+    .getElementById(id)
+    .classList.add("active");
+
+}
+
+
+/* =========================================
+   AUDIO
+========================================= */
+
+function stopAudio(audio){
+
+  audio.pause();
+
+  try{
+    audio.currentTime=0;
+  }catch(e){}
+
+}
+
+function playAudio(audio){
+
+  stopAudio(audio);
+
+  audio.volume=.85;
+
+  const p=audio.play();
+
+  if(p){
+    p.catch(()=>{});
+  }
+
+}
+
+function stopAllTracks(){
+
+  stopAudio(choosingAudio);
+  stopAudio(mouseAudio);
+  stopAudio(endAudio);
+
+}
+
+async function playAllTracks(){
+
+  const tracks=[
+    choosingAudio,
+    mouseAudio,
+    endAudio
+  ];
+
+  for(const track of tracks){
+
+    stopAllTracks();
+
+    try{
+      await track.play();
+
+      await new Promise(resolve=>{
+        track.onended=resolve;
+      });
+
+    }catch(e){
+      break;
+    }
+
+  }
+
+}
+
+function playSequenceAfterChoosing(){
+
+  stopAudio(choosingAudio);
+
+  playAudio(mouseAudio);
+
+}
+
+
+/* =========================================
+   CHOOSER
+========================================= */
+
+function manualStart(){
+
+  if(choosing)return;
+
+  startChooser();
+
+}
+
+
+function startChooser(){
+
+  if(choosing)return;
+
+  choosing=true;
+
+  showScreen("mainScreen");
+
+  answer.className="answer";
+  answer.textContent="";
+
+  question.textContent="?";
+  question.classList.add("choosing");
+
+  mainStatus.textContent="CHOOSING...";
+
+  playAudio(choosingAudio);
+
+  const choices=[
+    "LEFT",
+    "RIGHT",
+    "MIDDLE"
+  ];
+
+  let current=0;
+
+  const intervalTime=140;
+
+  const animation=setInterval(()=>{
+
+    answer.className="answer";
+
+    answer.textContent=
+      choices[Math.floor(Math.random()*3)];
+
+    current++;
+
+    if(current*intervalTime>=settings.chooseTime){
+
+      clearInterval(animation);
+
+      finishChooser(choices);
+
+    }
+
+  },intervalTime);
+
+}
+
+
+function finishChooser(choices){
+
+  /*
+    IMPORTANT:
+    The actual answer is selected now,
+    but is NOT displayed yet.
+
+    It stays hidden until mouse.mp3 finishes.
+  */
+
+  const finalChoice=
+    choices[Math.floor(Math.random()*choices.length)];
+
+  question.classList.remove("choosing");
+
+  question.textContent="?";
+
+  answer.textContent="";
+
+  mainStatus.textContent=
+    "WAIT FOR THE MUSIC...";
+
+  stopAudio(choosingAudio);
+
+  playAudio(mouseAudio);
+
+
+  /*
+    Wait for the whole mouse track.
+  */
+
+  let finished=false;
+
+  function reveal(){
+
+    if(finished)return;
+
+    finished=true;
+
+    mouseAudio.removeEventListener(
+      "ended",
+      reveal
+    );
+
+    revealAnswer(finalChoice);
+
+  }
+
+  mouseAudio.addEventListener(
+    "ended",
+    reveal
+  );
+
+  /*
+    Safety fallback if the browser cannot
+    read the audio duration.
+  */
+
+  setTimeout(()=>{
+
+    if(!finished){
+
+      reveal();
+
+    }
+
+  },30000);
+
+}
+
+
+function revealAnswer(finalChoice){
+
+  answer.className="answer";
+
+  if(finalChoice==="LEFT"){
+    answer.classList.add("left");
+  }
+
+  if(finalChoice==="RIGHT"){
+    answer.classList.add("right");
+  }
+
+  if(finalChoice==="MIDDLE"){
+    answer.classList.add("middle");
+  }
+
+  answer.textContent=finalChoice;
+
+  mainStatus.textContent="RESULT";
+
+  /*
+    Play the next track only after
+    the answer has been revealed.
+  */
+
+  playAudio(endAudio);
+
+
+  /*
+    Keep answer visible while end music plays.
+    Once finished, reset.
+  */
+
+  let resetDone=false;
+
+  function reset(){
+
+    if(resetDone)return;
+
+    resetDone=true;
+
+    endAudio.removeEventListener(
+      "ended",
+      reset
+    );
+
+    answer.className="answer";
+    answer.textContent="";
+
+    question.textContent="?";
+
+    mainStatus.textContent=
+      settings.sensor
+      ? "SENSOR ARMED"
+      : "READY";
+
+    choosing=false;
+
+  }
+
+  endAudio.addEventListener(
+    "ended",
+    reset
+  );
+
+  /*
+    Safety reset.
+  */
+
+  setTimeout(()=>{
+
+    if(!resetDone){
+      reset();
+    }
+
+  },30000);
+
+}
+
+
+/* =========================================
+   CAMERA SENSOR
+========================================= */
+
+async function startSensor(){
+
+  if(sensorStream){
+    stopSensor();
+  }
+
+  try{
+
+    sensorStream=
+      await navigator.mediaDevices.getUserMedia({
+        video:{
+          facingMode:"environment",
+          width:{ideal:1280},
+          height:{ideal:720}
+        },
+        audio:false
+      });
+
+    camera.srcObject=sensorStream;
+
+    showScreen("sensorScreen");
+
+    document.getElementById("sensorStatus")
+      .textContent="SENSOR ACTIVE";
+
+    startMotionDetection();
+
+  }catch(error){
+
+    alert(
+      "Camera access could not be started.\n\n"+
+      "Make sure you allow camera access and "+
+      "open this page using HTTPS."
+    );
+
+  }
+
+}
+
+
+function stopSensor(){
+
+  if(sensorTimer){
+    cancelAnimationFrame(sensorTimer);
+    sensorTimer=null;
+  }
+
+  if(sensorStream){
+
+    sensorStream
+      .getTracks()
+      .forEach(track=>track.stop());
+
+    sensorStream=null;
+
+  }
+
+  showScreen("mainScreen");
+
+  mainStatus.textContent="SENSOR OFF";
+
+}
+
+
+/*
+  Lightweight camera-motion detector.
+
+  It compares a small strip of the live
+  camera image with the previous frame.
+
+  When enough movement crosses the configured
+  bridge line, the chooser activates.
+*/
+
+let previousFrame=null;
+
+const motionCanvas=
+  document.createElement("canvas");
+
+motionCanvas.width=160;
+motionCanvas.height=90;
+
+const motionCtx=
+  motionCanvas.getContext("2d",{willReadFrequently:true});
+
+
+function startMotionDetection(){
+
+  previousFrame=null;
+
+  function detect(){
+
+    if(!sensorStream){
+      return;
+    }
+
+    if(
+      camera.readyState>=
+      HTMLMediaElement.HAVE_CURRENT_DATA
+    ){
+
+      motionCtx.drawImage(
+        camera,
+        0,
+        0,
+        160,
+        90
+      );
+
+      const image=
+        motionCtx.getImageData(
+          0,
+          0,
+          160,
+          90
+        );
+
+      const data=image.data;
+
+      if(previousFrame){
+
+        const y=
+          Math.floor(
+            90*(settings.trigger/100)
+          );
+
+        const band=6;
+
+        let movement=0;
+        let pixels=0;
+
+        for(
+          let yy=Math.max(0,y-band);
+          yy<Math.min(90,y+band);
+          yy++
+        ){
+
+          for(
+            let x=0;
+            x<160;
+            x++
+          ){
+
+            const i=(yy*160+x)*4;
+
+            const r=data[i];
+            const g=data[i+1];
+            const b=data[i+2];
+
+            const pr=previousFrame[i];
+            const pg=previousFrame[i+1];
+            const pb=previousFrame[i+2];
+
+            const difference=
+              Math.abs(r-pr)+
+              Math.abs(g-pg)+
+              Math.abs(b-pb);
+
+            if(difference>75){
+              movement++;
+            }
+
+            pixels++;
+
+          }
+
+        }
+
+        const movementRatio=
+          movement/pixels;
+
+        /*
+          A substantial change across the bridge
+          line triggers the chooser.
+        */
+
+        if(
+          movementRatio>.20 &&
+          !choosing
+        ){
+
+          triggerFromSensor();
+
+        }
+
+      }
+
+      previousFrame=
+        new Uint8ClampedArray(data);
+
+    }
+
+    sensorTimer=
+      requestAnimationFrame(detect);
+
+  }
+
+  detect();
+
+}
+
+
+function triggerFromSensor(){
+
+  if(choosing)return;
+
+  showScreen("mainScreen");
+
+  startChooser();
+
+  /*
+    Camera remains available so the next
+    person can trigger another round.
+  */
+
+  setTimeout(()=>{
+
+    if(
+      settings.sensor &&
+      !choosing &&
+      sensorStream
+    ){
+
+      showScreen("sensorScreen");
+
+    }
+
+  },1000);
+
+}
+
+
+/* =========================================
+   SETTINGS
+========================================= */
+
+function loadSettingsUI(){
+
+  const toggle=
+    document.getElementById("sensorToggle");
+
+  const text=
+    document.getElementById("sensorToggleText");
+
+  if(settings.sensor){
+
+    toggle.classList.add("on");
+    text.textContent="ON";
+
+  }else{
+
+    toggle.classList.remove("on");
+    text.textContent="OFF";
+
+  }
+
+  document.getElementById("triggerRange").value=
+    settings.trigger;
+
+  document.getElementById("triggerValue").textContent=
+    settings.trigger+"%";
+
+  document.getElementById("chooseTime").value=
+    settings.chooseTime;
+
+  document.getElementById("chooseTimeValue").textContent=
+    (settings.chooseTime/1000).toFixed(1)+"s";
+
+  updateTrigger();
+
+  renderTracks();
+
+}
+
+
+function toggleSensorSetting(){
+
+  settings.sensor=!settings.sensor;
+
+  loadSettingsUI();
+
+}
+
+
+function updateTrigger(){
+
+  settings.trigger=
+    Number(
+      document.getElementById("triggerRange").value
+    );
+
+  document.getElementById("triggerValue")
+    .textContent=
+    settings.trigger+"%";
+
+  sensorLine.style.top=
+    settings.trigger+"%";
+
+}
+
+
+function updateChooseTime(){
+
+  settings.chooseTime=
+    Number(
+      document.getElementById("chooseTime").value
+    );
+
+  document.getElementById("chooseTimeValue")
+    .textContent=
+    (settings.chooseTime/1000).toFixed(1)+"s";
+
+}
+
+
+function saveSettings(){
+
+  localStorage.setItem(
+    "chooserSettings",
+    JSON.stringify(settings)
+  );
+
+  if(settings.sensor){
+
+    startSensor();
+
+  }else{
+
+    stopSensor();
+
+  }
+
+}
+
+
+/* =========================================
+   CALIBRATION
+========================================= */
+
+function openCalibration(){
+
+  startSensor();
+
+  setTimeout(()=>{
+
+    alert(
+      "Point the camera at the bridge.\n\n"+
+      "Move the green SENSOR LINE until it "+
+      "sits across the place where the golf "+
+      "course movement should trigger the chooser.\n\n"+
+      "Then return to Admin Settings and press SAVE."
+    );
+
+  },800);
+
+}
+
+
+/* =========================================
+   TRACKS
+========================================= */
+
+function renderTracks(){
+
+  const container=
+    document.getElementById("tracks");
+
+  container.innerHTML="";
+
+  const tracks=[
+    ["Choosing","choosingAudio"],
+    ["Mouse / suspense","mouseAudio"],
+    ["End / next section","endAudio"]
+  ];
+
+  tracks.forEach(track=>{
+
+    const row=
+      document.createElement("div");
+
+    row.className="track";
+
+    row.innerHTML=`
+      <span>${track[0]}</span>
+      <button>PLAY</button>
+    `;
+
+    row.querySelector("button")
+      .onclick=()=>{
+
+        playAudio(
+          document.getElementById(track[1])
+        );
+
+      };
+
+    container.appendChild(row);
+
+  });
+
+}
+
+
+/* =========================================
+   ADMIN PIN
+========================================= */
+
+function openAdmin(){
+
+  showScreen("pinScreen");
+
+  document.getElementById("pinInput").value="";
+
+  setTimeout(()=>{
+    document.getElementById("pinInput").focus();
+  },100);
+
+}
+
+
+function checkPin(){
+
+  const pin=
+    document.getElementById("pinInput").value;
+
+  if(pin==="123"){
+
+    loadSettingsUI();
+
+    showScreen("settingsScreen");
+
+  }else{
+
+    alert("Incorrect PIN");
+
+  }
+
+}
+
+
+/* =========================================
+   SWIPE LEFT → ADMIN
+========================================= */
+
+let touchStartX=0;
+let touchStartY=0;
+
+document.addEventListener(
+  "touchstart",
+  event=>{
+
+    if(event.touches.length!==1)return;
+
+    touchStartX=
+      event.touches[0].clientX;
+
+    touchStartY=
+      event.touches[0].clientY;
+
+  },
+  {passive:true}
+);
+
+
+document.addEventListener(
+  "touchend",
+  event=>{
+
+    if(!touchStartX)return;
+
+    const endX=
+      event.changedTouches[0].clientX;
+
+    const endY=
+      event.changedTouches[0].clientY;
+
+    const dx=endX-touchStartX;
+    const dy=endY-touchStartY;
+
+    /*
+      Swipe from right toward left.
+    */
+
+    if(
+      dx < -120 &&
+      Math.abs(dx)>Math.abs(dy)
+    ){
+
+      openAdmin();
+
+    }
+
+    touchStartX=0;
+    touchStartY=0;
+
+  },
+  {passive:true}
+);
+
+
+/* =========================================
+   HIDDEN 7 TAP FULLSCREEN EXIT
+========================================= */
+
+function secretTap(){
+
+  secretTaps++;
+
+  document.getElementById("tapCounter")
+    .textContent=
+    secretTaps+"/7";
+
+  clearTimeout(secretTimer);
+
+  secretTimer=setTimeout(()=>{
+
+    secretTaps=0;
+
+    document.getElementById("tapCounter")
+      .textContent="";
+
+  },3000);
+
+  if(secretTaps>=7){
+
+    secretTaps=0;
+
+    document.getElementById("tapCounter")
+      .textContent="";
+
+    if(document.fullscreenElement){
+
+      document.exitFullscreen()
+        .catch(()=>{});
+
+    }
+
+  }
+
+}
+
+
+/* =========================================
+   FULLSCREEN
+========================================= */
+
+function enterFullscreen(){
+
+  if(!document.fullscreenElement){
+
+    document.documentElement
+      .requestFullscreen()
+      .catch(()=>{});
+
+  }
+
+}
+
+
+/*
+  First user interaction starts fullscreen.
+*/
+
+document.addEventListener(
+  "pointerdown",
+  enterFullscreen,
+  {once:true}
+);
+
+
+/* =========================================
+   INITIALISE
+========================================= */
+
+loadSettingsUI();
+
+mainStatus.textContent=
+  settings.sensor
+  ? "SENSOR ARMED"
+  : "READY";
+
+</script>
+
+</body>
+</html>
