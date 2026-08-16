@@ -1,0 +1,1663 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>Adventure Chooser</title>
+
+<style>
+*{
+  box-sizing:border-box;
+  margin:0;
+  padding:0;
+  user-select:none;
+  -webkit-tap-highlight-color:transparent;
+}
+
+html,body{
+  width:100%;
+  height:100%;
+  overflow:hidden;
+  font-family:Arial,sans-serif;
+}
+
+body{
+  background:
+    radial-gradient(circle at 20% 15%,#ffd740 0%,transparent 25%),
+    radial-gradient(circle at 85% 20%,#ff4081 0%,transparent 30%),
+    radial-gradient(circle at 50% 100%,#651fff 0%,transparent 55%),
+    linear-gradient(135deg,#ff6d00,#ff1744,#7c4dff);
+  color:white;
+}
+
+/* ---------------- MAIN ---------------- */
+
+#main{
+  position:absolute;
+  inset:0;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  flex-direction:column;
+}
+
+.title{
+  position:absolute;
+  top:25px;
+  width:100%;
+  text-align:center;
+  font-size:clamp(20px,4vw,42px);
+  font-weight:900;
+  letter-spacing:5px;
+  text-shadow:0 5px 25px #0006;
+}
+
+.status{
+  position:absolute;
+  top:82px;
+  font-size:13px;
+  letter-spacing:2px;
+  opacity:.75;
+}
+
+.question{
+  width:min(58vw,390px);
+  height:min(58vw,390px);
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+
+  font-size:clamp(130px,27vw,250px);
+  font-weight:900;
+
+  background:
+    radial-gradient(circle at 32% 22%,white 0%,#fff6 7%,transparent 25%),
+    linear-gradient(135deg,#ffeb3b,#ff9800,#ff1744,#7c4dff);
+
+  box-shadow:
+    0 0 35px #ffffff99,
+    0 25px 80px #0005,
+    inset 0 0 40px #ffffff44;
+
+  cursor:pointer;
+  transition:.2s;
+}
+
+.question:active{
+  transform:scale(.92);
+}
+
+.question.working{
+  animation:pulse .35s infinite alternate;
+}
+
+@keyframes pulse{
+  from{transform:scale(.95)}
+  to{transform:scale(1.06)}
+}
+
+.answer{
+  position:absolute;
+  bottom:12%;
+  min-height:100px;
+  font-size:clamp(55px,12vw,120px);
+  font-weight:1000;
+  letter-spacing:5px;
+  text-shadow:0 5px 25px #0007;
+}
+
+.left{
+  color:#ff5252;
+  text-shadow:0 0 25px #ff1744,0 0 60px #ff174488;
+}
+
+.right{
+  color:#00e676;
+  text-shadow:0 0 25px #00c853,0 0 60px #00c85388;
+}
+
+.middle{
+  color:#40c4ff;
+  text-shadow:0 0 25px #2979ff,0 0 60px #2979ff88;
+}
+
+/* ---------------- SENSOR ---------------- */
+
+#sensor{
+  position:absolute;
+  inset:0;
+  display:none;
+  background:#050509;
+}
+
+#camera{
+  position:absolute;
+  inset:0;
+  width:100%;
+  height:100%;
+  object-fit:cover;
+
+  /* FRONT CAMERA IS MIRRORED */
+  transform:scaleX(-1);
+}
+
+.cameraShade{
+  position:absolute;
+  inset:0;
+  background:linear-gradient(#0005,#0000 45%,#0008);
+  pointer-events:none;
+}
+
+.sensorLine{
+  position:absolute;
+  left:5%;
+  right:5%;
+  height:8px;
+  top:50%;
+
+  background:#00ff88;
+  box-shadow:
+    0 0 10px #00ff88,
+    0 0 30px #00ff88;
+
+  border-radius:20px;
+  z-index:5;
+}
+
+.sensorLabel{
+  position:absolute;
+  left:50%;
+  transform:translateX(-50%);
+  top:-45px;
+
+  background:#00ff88;
+  color:#002414;
+
+  padding:9px 18px;
+  border-radius:20px;
+
+  font-size:12px;
+  font-weight:bold;
+}
+
+.sensorTop{
+  position:absolute;
+  top:18px;
+  left:18px;
+  right:18px;
+  display:flex;
+  justify-content:space-between;
+  z-index:10;
+}
+
+.badge{
+  padding:10px 16px;
+  border-radius:20px;
+  background:#0009;
+  backdrop-filter:blur(12px);
+  font-size:13px;
+  font-weight:bold;
+}
+
+.sensorStop{
+  border:0;
+  color:white;
+  background:#ff1744aa;
+  padding:10px 16px;
+  border-radius:20px;
+  font-weight:bold;
+}
+
+/* ---------------- SETTINGS ---------------- */
+
+#settings,
+#pin{
+  position:absolute;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+}
+
+.panel{
+  width:min(94%,700px);
+  max-height:92vh;
+  overflow:auto;
+
+  padding:25px;
+
+  border-radius:30px;
+
+  background:#111827f2;
+  backdrop-filter:blur(25px);
+
+  box-shadow:0 25px 80px #0009;
+}
+
+.panel h2{
+  font-size:30px;
+  margin-bottom:5px;
+}
+
+.sub{
+  opacity:.6;
+  margin-bottom:20px;
+}
+
+.box{
+  padding:17px;
+  border-radius:20px;
+  background:#ffffff0d;
+  margin:10px 0;
+}
+
+.boxTitle{
+  font-weight:bold;
+  margin-bottom:12px;
+}
+
+.row{
+  display:flex;
+  gap:10px;
+  align-items:center;
+  flex-wrap:wrap;
+}
+
+button{
+  border:0;
+  cursor:pointer;
+}
+
+.btn{
+  padding:13px 18px;
+  border-radius:14px;
+  color:white;
+  font-weight:bold;
+  background:linear-gradient(135deg,#ff9800,#ff4081);
+}
+
+.btn.secondary{
+  background:#ffffff15;
+}
+
+input[type=range]{
+  flex:1;
+  min-width:180px;
+}
+
+.pinPanel{
+  width:min(90%,380px);
+  padding:30px;
+  border-radius:30px;
+  background:#111827f2;
+  text-align:center;
+  box-shadow:0 25px 80px #0009;
+}
+
+.pinInput{
+  width:100%;
+  margin:15px 0;
+  padding:14px;
+
+  border:0;
+  outline:0;
+  border-radius:14px;
+
+  background:#ffffff15;
+  color:white;
+
+  text-align:center;
+  font-size:28px;
+  letter-spacing:10px;
+}
+
+/* TOGGLE */
+
+.toggle{
+  width:58px;
+  height:32px;
+  border-radius:30px;
+  background:#555;
+  position:relative;
+}
+
+.toggle span{
+  position:absolute;
+  width:26px;
+  height:26px;
+  top:3px;
+  left:3px;
+  border-radius:50%;
+  background:white;
+  transition:.2s;
+}
+
+.toggle.on{
+  background:#00c853;
+}
+
+.toggle.on span{
+  left:29px;
+}
+
+/* SECRET EXIT */
+
+.secret{
+  position:fixed;
+  left:0;
+  top:0;
+  width:45px;
+  height:45px;
+  opacity:.02;
+  z-index:99999;
+}
+
+#tapCount{
+  position:fixed;
+  top:5px;
+  left:55px;
+  font-size:10px;
+  opacity:.08;
+  z-index:99999;
+}
+</style>
+</head>
+
+<body>
+
+<!-- MAIN -->
+
+<div id="main">
+
+  <div class="title">
+    LEFT • RIGHT • MIDDLE
+  </div>
+
+  <div class="status" id="status">
+    READY
+  </div>
+
+  <div
+    class="question"
+    id="question"
+    onclick="manualChoose()">
+    ?
+  </div>
+
+  <div
+    class="answer"
+    id="answer">
+  </div>
+
+</div>
+
+
+<!-- CAMERA SENSOR -->
+
+<div id="sensor">
+
+  <video
+    id="camera"
+    autoplay
+    muted
+    playsinline>
+  </video>
+
+  <div class="cameraShade"></div>
+
+  <div
+    class="sensorLine"
+    id="sensorLine">
+
+    <div class="sensorLabel">
+      BRIDGE SENSOR
+    </div>
+
+  </div>
+
+  <div class="sensorTop">
+
+    <div
+      class="badge"
+      id="sensorStatus">
+      SENSOR ACTIVE
+    </div>
+
+    <button
+      class="sensorStop"
+      onclick="stopSensor()">
+      STOP
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- PIN -->
+
+<div id="pin">
+
+  <div class="pinPanel">
+
+    <h2>ADMIN</h2>
+
+    <p style="opacity:.6;margin-top:8px">
+      Enter PIN
+    </p>
+
+    <input
+      class="pinInput"
+      id="pinInput"
+      type="password"
+      inputmode="numeric"
+      maxlength="3"
+      placeholder="•••">
+
+    <button
+      class="btn"
+      onclick="checkPin()">
+      ENTER
+    </button>
+
+  </div>
+
+</div>
+
+
+<!-- SETTINGS -->
+
+<div id="settings">
+
+  <div class="panel">
+
+    <h2>Admin Settings</h2>
+
+    <div class="sub">
+      Bridge sensor and music controls
+    </div>
+
+
+    <!-- SENSOR ON/OFF -->
+
+    <div class="box">
+
+      <div class="boxTitle">
+        Bridge Sensor
+      </div>
+
+      <div class="row">
+
+        <div
+          class="toggle"
+          id="sensorToggle"
+          onclick="toggleSensor()">
+
+          <span></span>
+
+        </div>
+
+        <b id="sensorToggleText">
+          OFF
+        </b>
+
+      </div>
+
+    </div>
+
+
+    <!-- BRIDGE SENSOR SAVE -->
+
+    <div class="box">
+
+      <div class="boxTitle">
+        Bridge Sensor Position
+      </div>
+
+      <p style="opacity:.6;margin-bottom:12px">
+        Put the green line across the bridge.
+        Then press SAVE BRIDGE SENSOR.
+      </p>
+
+      <div class="row">
+
+        <input
+          id="lineRange"
+          type="range"
+          min="10"
+          max="90"
+          value="50"
+          oninput="moveSensorLine()">
+
+        <b id="lineValue">
+          50%
+        </b>
+
+      </div>
+
+      <div style="margin-top:12px">
+
+        <button
+          class="btn"
+          onclick="openCameraCalibration()">
+          OPEN CAMERA
+        </button>
+
+        <button
+          class="btn"
+          onclick="saveBridgeSensor()">
+          SAVE BRIDGE SENSOR
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <!-- MUSIC -->
+
+    <div class="box">
+
+      <div class="boxTitle">
+        Music
+      </div>
+
+      <p style="opacity:.6;margin-bottom:12px">
+        Mouse music loops while waiting.
+      </p>
+
+      <button
+        class="btn"
+        onclick="playMouseLoop()">
+        PLAY WAITING MUSIC
+      </button>
+
+      <button
+        class="btn secondary"
+        onclick="stopMusic()">
+        STOP MUSIC
+      </button>
+
+    </div>
+
+
+    <!-- TRACK TEST -->
+
+    <div class="box">
+
+      <div class="boxTitle">
+        Test Tracks
+      </div>
+
+      <div class="row">
+
+        <button
+          class="btn"
+          onclick="playChoosing()">
+          CHOOSING
+        </button>
+
+        <button
+          class="btn"
+          onclick="playMouseLoop()">
+          MOUSE
+        </button>
+
+        <button
+          class="btn"
+          onclick="playEnd()">
+          END
+        </button>
+
+      </div>
+
+    </div>
+
+
+    <div
+      class="row"
+      style="margin-top:18px">
+
+      <button
+        class="btn"
+        onclick="saveSettings()">
+        SAVE SETTINGS
+      </button>
+
+      <button
+        class="btn secondary"
+        onclick="closeSettings()">
+        CLOSE
+      </button>
+
+    </div>
+
+  </div>
+
+</div>
+
+
+<!-- SECRET FULLSCREEN EXIT -->
+
+<div
+  class="secret"
+  onclick="secretTap()">
+</div>
+
+<div id="tapCount"></div>
+
+
+<!-- AUDIO -->
+
+<audio
+  id="mouseAudio"
+  preload="auto">
+
+  <source
+    src="https://rohansweb-codexamples.github.io/Gruffalo/mouse.mp3"
+    type="audio/mpeg">
+
+</audio>
+
+<audio
+  id="choosingAudio"
+  preload="auto">
+
+  <source
+    src="https://rohansweb-codexamples.github.io/Gruffalo/choosing.mp3"
+    type="audio/mpeg">
+
+</audio>
+
+<audio
+  id="endAudio"
+  preload="auto">
+
+  <source
+    src="https://rohansweb-codexamples.github.io/Gruffalo/end.mp3"
+    type="audio/mpeg">
+
+</audio>
+
+
+<script>
+
+/* ==========================================
+   ELEMENTS
+========================================== */
+
+const main=document.getElementById("main");
+const sensor=document.getElementById("sensor");
+const settingsPanel=document.getElementById("settings");
+const pinPanel=document.getElementById("pin");
+
+const camera=document.getElementById("camera");
+const sensorLine=document.getElementById("sensorLine");
+
+const question=document.getElementById("question");
+const answer=document.getElementById("answer");
+const status=document.getElementById("status");
+
+const mouseAudio=document.getElementById("mouseAudio");
+const choosingAudio=document.getElementById("choosingAudio");
+const endAudio=document.getElementById("endAudio");
+
+
+/* ==========================================
+   SETTINGS
+========================================== */
+
+let saved=
+  JSON.parse(
+    localStorage.getItem("bridgeChooserSettings")
+  ) || {
+    sensor:false,
+    line:50
+  };
+
+let sensorStream=null;
+let sensorAnimation=null;
+
+let choosing=false;
+
+let previousFrame=null;
+
+let secretTaps=0;
+let secretTimer=null;
+
+
+/* ==========================================
+   AUDIO HELPERS
+========================================== */
+
+function stopAudio(audio){
+
+  audio.pause();
+
+  try{
+    audio.currentTime=0;
+  }catch(e){}
+
+}
+
+function stopMusic(){
+
+  stopAudio(mouseAudio);
+  stopAudio(choosingAudio);
+  stopAudio(endAudio);
+
+}
+
+
+/*
+  MOUSE MUSIC:
+  This loops continuously while the system
+  is waiting for someone to cross the bridge.
+*/
+
+function playMouseLoop(){
+
+  stopAudio(choosingAudio);
+  stopAudio(endAudio);
+
+  mouseAudio.loop=true;
+  mouseAudio.volume=.8;
+
+  mouseAudio.play().catch(()=>{});
+
+}
+
+
+/* CHOOSING */
+
+function playChoosing(){
+
+  mouseAudio.loop=false;
+  stopAudio(mouseAudio);
+  stopAudio(endAudio);
+
+  choosingAudio.loop=false;
+  choosingAudio.currentTime=0;
+  choosingAudio.volume=.85;
+
+  choosingAudio.play().catch(()=>{});
+
+}
+
+
+/* END */
+
+function playEnd(){
+
+  stopAudio(mouseAudio);
+  stopAudio(choosingAudio);
+
+  endAudio.currentTime=0;
+  endAudio.volume=.85;
+
+  endAudio.play().catch(()=>{});
+
+}
+
+
+/* ==========================================
+   CHOOSER
+========================================== */
+
+function manualChoose(){
+
+  if(choosing)return;
+
+  startChooser();
+
+}
+
+
+function startChooser(){
+
+  if(choosing)return;
+
+  choosing=true;
+
+  /*
+    Stop the looping waiting music.
+  */
+
+  mouseAudio.loop=false;
+  stopAudio(mouseAudio);
+
+  main.style.display="flex";
+  sensor.style.display="none";
+
+  question.classList.add("working");
+
+  answer.className="answer";
+  answer.textContent="";
+
+  status.textContent="CHOOSING...";
+
+  playChoosing();
+
+  const choices=[
+    "LEFT",
+    "RIGHT",
+    "MIDDLE"
+  ];
+
+  let count=0;
+
+  /*
+    Cycle choices while choosing.mp3 plays.
+  */
+
+  const animation=setInterval(()=>{
+
+    answer.textContent=
+      choices[
+        Math.floor(
+          Math.random()*choices.length
+        )
+      ];
+
+    count++;
+
+    /*
+      Don't reveal the final answer yet.
+      Wait until choosing.mp3 finishes.
+    */
+
+    if(
+      choosingAudio.ended
+    ){
+
+      clearInterval(animation);
+
+      finishChoosing(choices);
+
+    }
+
+  },150);
+
+
+  /*
+    If the audio has no usable duration,
+    still make sure it eventually completes.
+  */
+
+  choosingAudio.onended=()=>{
+
+    clearInterval(animation);
+
+    finishChoosing(choices);
+
+  };
+
+}
+
+
+/* ==========================================
+   FINISH CHOOSING
+========================================== */
+
+function finishChoosing(choices){
+
+  if(!choosing)return;
+
+  choosingAudio.onended=null;
+
+  /*
+    Select answer now, but keep it hidden.
+  */
+
+  const finalChoice=
+    choices[
+      Math.floor(
+        Math.random()*choices.length
+      )
+    ];
+
+  question.classList.remove("working");
+
+  /*
+    Reveal ONLY after choosing music ends.
+  */
+
+  reveal(finalChoice);
+
+}
+
+
+function reveal(finalChoice){
+
+  answer.className="answer";
+
+  if(finalChoice==="LEFT"){
+    answer.classList.add("left");
+  }
+
+  if(finalChoice==="RIGHT"){
+    answer.classList.add("right");
+  }
+
+  if(finalChoice==="MIDDLE"){
+    answer.classList.add("middle");
+  }
+
+  answer.textContent=finalChoice;
+
+  status.textContent="RESULT";
+
+  /*
+    Now play END.
+  */
+
+  playEnd();
+
+  /*
+    When end.mp3 finishes:
+    reset everything and start mouse again.
+  */
+
+  endAudio.onended=()=>{
+
+    endAudio.onended=null;
+
+    resetChooser();
+
+  };
+
+}
+
+
+function resetChooser(){
+
+  answer.className="answer";
+  answer.textContent="";
+
+  question.textContent="?";
+
+  choosing=false;
+
+  status.textContent=
+    saved.sensor
+    ? "BRIDGE SENSOR ARMED"
+    : "READY";
+
+  /*
+    Start mouse music again.
+  */
+
+  playMouseLoop();
+
+  /*
+    Re-open camera if sensor is enabled.
+  */
+
+  if(saved.sensor){
+
+    setTimeout(()=>{
+      startSensor();
+    },300);
+
+  }
+
+}
+
+
+/* ==========================================
+   CAMERA
+========================================== */
+
+async function startSensor(){
+
+  /*
+    Don't create multiple camera streams.
+  */
+
+  if(sensorStream)return;
+
+  try{
+
+    /*
+      FRONT CAMERA:
+      facingMode user
+    */
+
+    sensorStream=
+      await navigator.mediaDevices.getUserMedia({
+
+        video:{
+          facingMode:"user",
+          width:{ideal:1280},
+          height:{ideal:720}
+        },
+
+        audio:false
+
+      });
+
+    camera.srcObject=sensorStream;
+
+    main.style.display="none";
+    settingsPanel.style.display="none";
+    pinPanel.style.display="none";
+    sensor.style.display="block";
+
+    moveSensorLine();
+
+    document.getElementById("sensorStatus")
+      .textContent=
+      "BRIDGE SENSOR ACTIVE";
+
+    startDetection();
+
+  }catch(error){
+
+    alert(
+      "Camera could not start.\n\n"+
+      "Allow camera access in your browser.\n"+
+      "This page must also be opened using HTTPS."
+    );
+
+  }
+
+}
+
+
+function stopSensor(){
+
+  if(sensorAnimation){
+
+    cancelAnimationFrame(
+      sensorAnimation
+    );
+
+    sensorAnimation=null;
+
+  }
+
+  if(sensorStream){
+
+    sensorStream
+      .getTracks()
+      .forEach(track=>{
+        track.stop();
+      });
+
+    sensorStream=null;
+
+  }
+
+  sensor.style.display="none";
+  main.style.display="flex";
+
+  previousFrame=null;
+
+}
+
+
+/* ==========================================
+   BRIDGE DETECTION
+========================================== */
+
+/*
+  This uses the front camera.
+
+  It watches a narrow horizontal strip
+  around the saved bridge line.
+
+  Movement across the saved line triggers
+  the chooser.
+*/
+
+const canvas=document.createElement("canvas");
+
+canvas.width=160;
+canvas.height=90;
+
+const ctx=
+  canvas.getContext(
+    "2d",
+    {willReadFrequently:true}
+  );
+
+
+let cooldown=false;
+
+
+function startDetection(){
+
+  previousFrame=null;
+
+  function frame(){
+
+    if(!sensorStream){
+
+      return;
+
+    }
+
+    if(
+      camera.readyState>=
+      HTMLMediaElement.HAVE_CURRENT_DATA
+    ){
+
+      ctx.drawImage(
+        camera,
+        0,
+        0,
+        160,
+        90
+      );
+
+      const current=
+        ctx.getImageData(
+          0,
+          0,
+          160,
+          90
+        ).data;
+
+
+      if(previousFrame){
+
+        const center=
+          Math.round(
+            90*(saved.line/100)
+          );
+
+        /*
+          Use a wider detection zone.
+          This makes the bridge sensor
+          much easier to trigger.
+        */
+
+        const top=
+          Math.max(
+            0,
+            center-10
+          );
+
+        const bottom=
+          Math.min(
+            90,
+            center+10
+          );
+
+        let changed=0;
+        let total=0;
+
+        for(
+          let y=top;
+          y<bottom;
+          y++
+        ){
+
+          for(
+            let x=0;
+            x<160;
+            x++
+          ){
+
+            const i=
+              (y*160+x)*4;
+
+            const difference=
+              Math.abs(
+                current[i]-
+                previousFrame[i]
+              )+
+              Math.abs(
+                current[i+1]-
+                previousFrame[i+1]
+              )+
+              Math.abs(
+                current[i+2]-
+                previousFrame[i+2]
+              );
+
+            if(difference>55){
+
+              changed++;
+
+            }
+
+            total++;
+
+          }
+
+        }
+
+        const ratio=
+          changed/total;
+
+
+        /*
+          Trigger at 8% movement.
+          This is deliberately much more
+          sensitive than the previous version.
+        */
+
+        if(
+          ratio>.08 &&
+          !cooldown &&
+          !choosing
+        ){
+
+          triggerBridge();
+
+        }
+
+      }
+
+      previousFrame=
+        new Uint8ClampedArray(current);
+
+    }
+
+    sensorAnimation=
+      requestAnimationFrame(frame);
+
+  }
+
+  frame();
+
+}
+
+
+/* ==========================================
+   SENSOR TRIGGER
+========================================== */
+
+function triggerBridge(){
+
+  if(cooldown || choosing)return;
+
+  cooldown=true;
+
+  /*
+    STOP WAITING MUSIC IMMEDIATELY
+  */
+
+  mouseAudio.loop=false;
+  stopAudio(mouseAudio);
+
+  /*
+    Start chooser.
+  */
+
+  startChooser();
+
+
+  /*
+    Prevent repeated triggers while the
+    same person is still in view.
+  */
+
+  setTimeout(()=>{
+
+    cooldown=false;
+
+  },8000);
+
+}
+
+
+/* ==========================================
+   SENSOR SETTINGS
+========================================== */
+
+function toggleSensor(){
+
+  saved.sensor=!saved.sensor;
+
+  updateSettingsUI();
+
+}
+
+
+function moveSensorLine(){
+
+  const value=
+    Number(
+      document.getElementById("lineRange").value
+    );
+
+  saved.line=value;
+
+  document.getElementById("lineValue")
+    .textContent=
+    value+"%";
+
+  sensorLine.style.top=
+    value+"%";
+
+}
+
+
+function saveBridgeSensor(){
+
+  moveSensorLine();
+
+  localStorage.setItem(
+    "bridgeChooserSettings",
+    JSON.stringify(saved)
+  );
+
+  alert(
+    "BRIDGE SENSOR SAVED.\n\n"+
+    "The green line position has been saved."
+  );
+
+}
+
+
+function saveSettings(){
+
+  moveSensorLine();
+
+  localStorage.setItem(
+    "bridgeChooserSettings",
+    JSON.stringify(saved)
+  );
+
+  if(saved.sensor){
+
+    startSensor();
+
+    playMouseLoop();
+
+  }else{
+
+    stopSensor();
+    stopMusic();
+
+  }
+
+  alert("SETTINGS SAVED");
+
+}
+
+
+function updateSettingsUI(){
+
+  const toggle=
+    document.getElementById(
+      "sensorToggle"
+    );
+
+  const text=
+    document.getElementById(
+      "sensorToggleText"
+    );
+
+  if(saved.sensor){
+
+    toggle.classList.add("on");
+    text.textContent="ON";
+
+  }else{
+
+    toggle.classList.remove("on");
+    text.textContent="OFF";
+
+  }
+
+}
+
+
+/* ==========================================
+   CAMERA CALIBRATION
+========================================== */
+
+function openCameraCalibration(){
+
+  startSensor();
+
+  setTimeout(()=>{
+
+    alert(
+      "CAMERA CALIBRATION\n\n"+
+      "Point the FRONT camera at the bridge.\n\n"+
+      "Move the green BRIDGE SENSOR line "+
+      "onto the area where someone passes.\n\n"+
+      "Then return here and press "+
+      "SAVE BRIDGE SENSOR."
+    );
+
+  },700);
+
+}
+
+
+/* ==========================================
+   ADMIN
+========================================== */
+
+function openAdmin(){
+
+  pinPanel.style.display="flex";
+  main.style.display="none";
+  sensor.style.display="none";
+  settingsPanel.style.display="none";
+
+  document.getElementById(
+    "pinInput"
+  ).value="";
+
+  setTimeout(()=>{
+
+    document.getElementById(
+      "pinInput"
+    ).focus();
+
+  },100);
+
+}
+
+
+function checkPin(){
+
+  const pin=
+    document.getElementById(
+      "pinInput"
+    ).value;
+
+  if(pin==="123"){
+
+    pinPanel.style.display="none";
+    settingsPanel.style.display="flex";
+
+    document.getElementById(
+      "lineRange"
+    ).value=saved.line;
+
+    moveSensorLine();
+    updateSettingsUI();
+
+  }else{
+
+    alert("INCORRECT PIN");
+
+  }
+
+}
+
+
+function closeSettings(){
+
+  settingsPanel.style.display="none";
+  main.style.display="flex";
+
+  status.textContent=
+    saved.sensor
+    ? "BRIDGE SENSOR ARMED"
+    : "READY";
+
+}
+
+
+/* ==========================================
+   SWIPE LEFT → ADMIN
+========================================== */
+
+let startX=0;
+let startY=0;
+
+document.addEventListener(
+  "touchstart",
+  e=>{
+
+    if(e.touches.length!==1)return;
+
+    startX=
+      e.touches[0].clientX;
+
+    startY=
+      e.touches[0].clientY;
+
+  },
+  {passive:true}
+);
+
+
+document.addEventListener(
+  "touchend",
+  e=>{
+
+    if(!startX)return;
+
+    const endX=
+      e.changedTouches[0].clientX;
+
+    const endY=
+      e.changedTouches[0].clientY;
+
+    const dx=endX-startX;
+    const dy=endY-startY;
+
+    /*
+      Swipe right → left.
+    */
+
+    if(
+      dx<-120 &&
+      Math.abs(dx)>Math.abs(dy)
+    ){
+
+      openAdmin();
+
+    }
+
+    startX=0;
+    startY=0;
+
+  },
+  {passive:true}
+);
+
+
+/* ==========================================
+   HIDDEN 7 TAP FULLSCREEN EXIT
+========================================== */
+
+function secretTap(){
+
+  secretTaps++;
+
+  document.getElementById(
+    "tapCount"
+  ).textContent=
+    secretTaps+"/7";
+
+  clearTimeout(secretTimer);
+
+  secretTimer=setTimeout(()=>{
+
+    secretTaps=0;
+
+    document.getElementById(
+      "tapCount"
+    ).textContent="";
+
+  },3000);
+
+
+  if(secretTaps>=7){
+
+    secretTaps=0;
+
+    document.getElementById(
+      "tapCount"
+    ).textContent="";
+
+    if(document.fullscreenElement){
+
+      document.exitFullscreen()
+        .catch(()=>{});
+
+    }
+
+  }
+
+}
+
+
+/* ==========================================
+   FULLSCREEN
+========================================== */
+
+document.addEventListener(
+  "pointerdown",
+  ()=>{
+    if(!document.fullscreenElement){
+      document.documentElement
+        .requestFullscreen()
+        .catch(()=>{});
+    }
+  },
+  {once:true}
+);
+
+
+/* ==========================================
+   INITIALISE
+========================================== */
+
+moveSensorLine();
+updateSettingsUI();
+
+status.textContent=
+  saved.sensor
+  ? "BRIDGE SENSOR ARMED"
+  : "READY";
+
+
+/*
+  If sensor mode was previously saved,
+  don't automatically request camera permission
+  until the user interacts with the page.
+*/
+
+document.addEventListener(
+  "click",
+  ()=>{
+    if(
+      saved.sensor &&
+      !sensorStream &&
+      !choosing
+    ){
+
+      startSensor();
+      playMouseLoop();
+
+    }
+  },
+  {once:true}
+);
+
+</script>
+
+</body>
+</html>
